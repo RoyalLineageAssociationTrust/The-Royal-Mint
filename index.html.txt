@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Royal Lineage - RWA Mint</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <style>
+        body { background: #0a0a0a; color: #d4af37; font-family: 'Courier New', monospace; text-align: center; padding: 50px; }
+        .vault-box { border: 2px solid #d4af37; padding: 30px; display: inline-block; border-radius: 10px; }
+        button { background: #d4af37; color: black; border: none; padding: 15px 30px; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
+        #price { font-size: 2.5rem; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="vault-box">
+        <h1>THE ROYAL LINEAGE</h1>
+        <p>Sovereign RWA Singleton Vault</p>
+        <hr color="#d4af37">
+        <p>CURRENT INSTITUTIONAL VALUATION:</p>
+        <div id="price">LOADING...</div>
+        <button onclick="purchaseRWA()">ACQUIRE ASSET</button>
+        <p style="font-size: 0.8rem; margin-top: 20px;">Vault: 0x3D47...a7e3</p>
+    </div>
+
+    <script>
+        const vaultAddress = "0x3D47b1aCd814CFe296F1E9816273218DBA24a7e3";
+        const abi = [{"inputs":[],"name":"currentValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+        async function loadPrice() {
+            const provider = new ethers.providers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/6kF0ihyoTX5OEQ447YRRc");
+            const contract = new ethers.Contract(vaultAddress, abi, provider);
+            const rawVal = await contract.currentValue();
+            const price = parseFloat(rawVal) / 7222; // Your Divisor
+            document.getElementById('price').innerText = "$" + price.toLocaleString(undefined, {minimumFractionDigits: 2});
+        }
+
+        async function purchaseRWA() {
+            if (typeof window.ethereum !== 'undefined') {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const tx = await signer.sendTransaction({
+                    to: vaultAddress,
+                    value: ethers.utils.parseEther("0.1") // Or the specific 65K amount in ETH
+                });
+                alert("Purchase Initialized: " + tx.hash);
+            } else {
+                alert("Please install Rabby or MetaMask");
+            }
+        }
+        loadPrice();
+        setInterval(loadPrice, 30000); // Syncs with your Terminal 1 updates
+    </script>
+</body>
+</html>
